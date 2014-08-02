@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/garyburd/redigo/redis"
 )
 
 const (
-	// TODO, read from env
-	redisAddress = "localhost:6379"
 	// Name of redis channel for hits subscription
 	redisChannel = "hits"
 )
@@ -20,9 +19,16 @@ func main() {
 
 func connect() redis.Conn {
 	// TODO:
-	// - handle connection errors
-	// - add authentication handling
+	// - handle connection / authentication errors
+	redisAddress := os.Getenv("REDIS_ADDRESS")
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+
 	connection, _ := redis.Dial("tcp", redisAddress)
+
+	if len(redisPassword) > 0 {
+		connection.Send("AUTH", redisPassword)
+	}
+
 	return connection
 }
 
