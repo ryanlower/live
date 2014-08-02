@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/garyburd/redigo/redis"
@@ -18,15 +19,19 @@ func main() {
 }
 
 func connect() redis.Conn {
-	// TODO:
-	// - handle connection / authentication errors
 	redisAddress := os.Getenv("REDIS_ADDRESS")
 	redisPassword := os.Getenv("REDIS_PASSWORD")
 
-	connection, _ := redis.Dial("tcp", redisAddress)
+	connection, err := redis.Dial("tcp", redisAddress)
+	if err != nil {
+		log.Panic("Eror connecting to redis...", err)
+	}
 
 	if len(redisPassword) > 0 {
-		connection.Send("AUTH", redisPassword)
+		err := connection.Send("AUTH", redisPassword)
+		if err != nil {
+			log.Panic("Eror authenticating...", err)
+		}
 	}
 
 	return connection
