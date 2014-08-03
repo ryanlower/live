@@ -21,7 +21,9 @@ type Hit struct {
 
 func main() {
 	connection := connect()
-	listen(connection)
+	go listen(connection)
+
+	serve()
 }
 
 func connect() redis.Conn {
