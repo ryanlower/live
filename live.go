@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 
@@ -12,6 +12,12 @@ const (
 	// Name of redis channel for hits subscription
 	redisChannel = "hits"
 )
+
+type Hit struct {
+	Host string
+	Path string
+	Code string
+}
 
 func main() {
 	connection := connect()
@@ -41,17 +47,20 @@ func listen(connection redis.Conn) {
 	pubSubConnection := redis.PubSubConn{connection}
 
 	pubSubConnection.Subscribe(redisChannel)
-	fmt.Println("Listening to " + redisChannel + " channel...")
+	log.Println("Listening to " + redisChannel + " channel...")
 
 	for {
 		reply, message := pubSubConnection.Receive().(redis.Message)
 		if message {
-			logHit(reply)
+			hit := parseMessage(reply)
+			log.Print("[" + hit.Code + "] " + hit.Host + hit.Path)
 		}
 	}
 }
 
-func logHit(hitMessage redis.Message) {
-	hit := string(hitMessage.Data)
-	fmt.Println(hit)
+func parseMessage(hitMessage redis.Message) Hit {
+	var hit Hit
+	json.Unmarshal(hitMessage.Data, &hit)
+
+	return hit
 }
