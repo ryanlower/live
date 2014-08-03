@@ -45,12 +45,13 @@ func listen(connection redis.Conn) {
 
 	for {
 		reply, message := pubSubConnection.Receive().(redis.Message)
-    if message {
-      logHit(reply)
-    }
+		if message {
+			logHit(reply)
+		}
 	}
 }
 
-func logHit(hitMessage redis.Message)  {
-  fmt.Println(hitMessage.Data)
+func logHit(hitMessage redis.Message) {
+	hit := string(hitMessage.Data)
+	fmt.Println(hit)
 }
