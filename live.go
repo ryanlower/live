@@ -19,6 +19,8 @@ type Hit struct {
 	Code string
 }
 
+var hits = make(chan Hit)
+
 func main() {
 	connection := connect()
 	go listen(connection)
@@ -55,6 +57,7 @@ func listen(connection redis.Conn) {
 		reply, message := pubSubConnection.Receive().(redis.Message)
 		if message {
 			hit := parseMessage(reply)
+			hits <- hit
 			log.Print("[" + hit.Code + "] " + hit.Host + hit.Path)
 		}
 	}

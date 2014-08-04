@@ -39,14 +39,11 @@ func webSocketHandler(w http.ResponseWriter, r *http.Request) {
 		log.Panic(err)
 	}
 
-	// Just send received messages back to the client
 	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
+		var hit Hit
+		hit = <-hits
 
-		conn.WriteMessage(websocket.TextMessage, message)
+		conn.WriteMessage(websocket.TextMessage, []byte(hit.Code))
 	}
 
 	conn.Close()
