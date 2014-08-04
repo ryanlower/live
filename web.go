@@ -1,11 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 )
+
+var templates = template.Must(template.ParseFiles("web/home.html"))
 
 func serve() {
 	port := os.Getenv("PORT")
@@ -20,5 +22,5 @@ func serve() {
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "hits are coming")
+	templates.ExecuteTemplate(w, "home.html", nil)
 }
