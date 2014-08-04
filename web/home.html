@@ -1,1 +1,20 @@
-<h1>hits are coming</h1>
+<h1>hits are coming, via ws://{{$}}/websocket</h1>
+
+<script>
+  var ws = new WebSocket("ws://{{$}}/websocket");
+
+  ws.onopen = function() {
+    console.log("WebSocket connected...");
+
+    // Send test message
+    ws.send('Hello');
+  }
+
+  ws.onmessage = function(event) {
+    console.log("WebSocket message received...", event.data);
+  }
+
+  ws.onclose = function() {
+    console.log("WebSocket closed.");
+  }
+</script>

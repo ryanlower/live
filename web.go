@@ -5,7 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 var templates = template.Must(template.ParseFiles("web/home.html"))
 
@@ -13,6 +20,7 @@ func serve() {
 	port := os.Getenv("PORT")
 
 	http.HandleFunc("/", webHandler)
+	http.HandleFunc("/websocket", webSocketHandler)
 
 	log.Print("Listening to serve on port " + port + "...")
 	err := http.ListenAndServe(":"+port, nil)
@@ -22,5 +30,24 @@ func serve() {
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "home.html", nil)
+	templates.ExecuteTemplate(w, "home.html", r.Host)
+}
+
+func webSocketHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	// Just send received messages back to the client
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+
+		conn.WriteMessage(websocket.TextMessage, message)
+	}
+
+	conn.Close()
 }
