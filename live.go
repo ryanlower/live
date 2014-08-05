@@ -51,7 +51,7 @@ func listen(connection redis.Conn) {
 	pubSubConnection := redis.PubSubConn{connection}
 
 	pubSubConnection.Subscribe(redisChannel)
-	log.Println("Listening to " + redisChannel + " channel...")
+	log.Println("Listening to redis '" + redisChannel + "' channel...")
 
 	for {
 		reply, message := pubSubConnection.Receive().(redis.Message)

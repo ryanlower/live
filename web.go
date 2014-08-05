@@ -22,10 +22,21 @@ func serve() {
 	http.HandleFunc("/", webHandler)
 	http.HandleFunc("/websocket", webSocketHandler)
 
+	go receiveHits()
+
 	log.Print("Listening to serve on port " + port + "...")
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Panic(err)
+	}
+}
+
+func receiveHits() {
+	log.Print("Receiving hits...")
+	for {
+		hit := <-hits
+		// TODO, send to open sockets
+		log.Print(hit)
 	}
 }
 
@@ -39,12 +50,8 @@ func webSocketHandler(w http.ResponseWriter, r *http.Request) {
 		log.Panic(err)
 	}
 
-	for {
-		var hit Hit
-		hit = <-hits
-
-		conn.WriteMessage(websocket.TextMessage, []byte(hit.Code))
-	}
+	// TODO, remember open sockets so we can send hits to them
+	conn.WriteMessage(websocket.TextMessage, []byte("hi there"))
 
 	conn.Close()
 }
