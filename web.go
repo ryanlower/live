@@ -15,14 +15,16 @@ var upgrader = websocket.Upgrader{
 }
 
 var templates = template.Must(template.ParseFiles("web/home.html"))
+var assets = template.Must(template.ParseFiles("web/assets/home.js"))
 
 var connections = make(map[*websocket.Conn]bool)
 
 func serve() {
 	port := os.Getenv("PORT")
 
-	http.HandleFunc("/", webHandler)
+	http.HandleFunc("/assets/", assetHandler)
 	http.HandleFunc("/websocket", webSocketHandler)
+	http.HandleFunc("/", webHandler)
 
 	go receiveHits()
 
@@ -63,4 +65,8 @@ func webSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO, close sockets and remove from connections map
 	// conn.Close()
+}
+
+func assetHandler(w http.ResponseWriter, r *http.Request) {
+	assets.ExecuteTemplate(w, "home.js", r.Host)
 }
