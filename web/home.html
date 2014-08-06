@@ -1,20 +1,26 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
 <h1>hits are coming, via ws://{{$}}/websocket</h1>
 
+<ol class='hits'>
+</ol>
+
 <script>
-  var ws = new WebSocket("ws://{{$}}/websocket");
+  $(function(){
+    var ws = new WebSocket("ws://{{$}}/websocket");
 
-  ws.onopen = function() {
-    console.log("WebSocket connected...");
+    ws.onopen = function() {
+      console.log("WebSocket connected...");
+    }
 
-    // Send test message
-    ws.send('Hello');
-  }
+    ws.onmessage = function(event) {
+      data = JSON.parse(event.data);
+      console.log("WebSocket message received...", data);
+      $('ol.hits').append('<li>' + data.Code + '</li>');
+    }
 
-  ws.onmessage = function(event) {
-    console.log("WebSocket message received...", event.data);
-  }
-
-  ws.onclose = function() {
-    console.log("WebSocket closed.");
-  }
+    ws.onclose = function() {
+      console.log("WebSocket closed.");
+    }
+  });
 </script>
