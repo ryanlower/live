@@ -16,6 +16,8 @@ var upgrader = websocket.Upgrader{
 
 var templates = template.Must(template.ParseFiles("web/home.html"))
 
+var connections = make(map[*websocket.Conn]bool)
+
 func serve() {
 	port := os.Getenv("PORT")
 
@@ -33,10 +35,16 @@ func serve() {
 
 func receiveHits() {
 	log.Print("Receiving hits...")
+
 	for {
 		hit := <-hits
-		// TODO, send to open sockets
-		log.Print(hit)
+
+		log.Print("Received hit, sending to connections...")
+
+		// Send hit to socket connections
+		for conn := range connections {
+			conn.WriteJSON(hit)
+		}
 	}
 }
 
@@ -50,8 +58,9 @@ func webSocketHandler(w http.ResponseWriter, r *http.Request) {
 		log.Panic(err)
 	}
 
-	// TODO, remember open sockets so we can send hits to them
-	conn.WriteMessage(websocket.TextMessage, []byte("hi there"))
+	// Add connection to connections map
+	connections[conn] = true
 
-	conn.Close()
+	// TODO, close sockets and remove from connections map
+	// conn.Close()
 }
